@@ -163,7 +163,7 @@ int CSubtitleManipulate::groupingSentences(std::vector<SubtitleLine> v_sub_title
 			else 
 			{
 				// Concat content to the last Element & update ToTime
-				v_out[v_out.size()-1].content += v_sub_title[i].content;
+				v_out[v_out.size()-1].content += " " + v_sub_title[i].content;
 				v_out[v_out.size()-1].to_Time = v_sub_title[i].to_Time;
 				v_out[v_out.size()-1].l_ToTheTime = v_sub_title[i].l_ToTheTime;
 			}
@@ -218,7 +218,7 @@ int CSubtitleManipulate::groupingSentences_ByBlockTime(int block_ByMilliSecs,std
 				printf("\tTime=(%s --> %s) = (%d --> %d)\r\n", v_sub_title[i].fromTheTime.c_str(), v_sub_title[i].to_Time.c_str(), v_sub_title[i].l_From_Time, v_sub_title[i].l_ToTheTime);
 				printf("\tPosition = %d\r\n", i);
 
-				new_E.content += new_E.l_ToTheTime < 0 ? v_sub_title[i].content : "\r\n" + v_sub_title[i].content;
+				new_E.content += new_E.l_ToTheTime < 0 ? v_sub_title[i].content : string("\r\n") + v_sub_title[i].content;
 				new_E.l_ToTheTime = v_sub_title[i].l_ToTheTime;
 				new_E.to_Time = v_sub_title[i].to_Time;
 
