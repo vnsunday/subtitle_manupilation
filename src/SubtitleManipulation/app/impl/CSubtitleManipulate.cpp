@@ -36,7 +36,7 @@ int CSubtitleManipulate::load_FromFile(const char* sz_File, std::vector<Subtitle
 
 	while (std::getline(file, line))
 	{
-		printf("Load line=%s\r\n", line.c_str());
+		// printf("Load line=%s\r\n", line.c_str());
 		next_candidateMarkTypes(last_type, candiate_Mark_Types, count_Candidates_);
 		loop_Passed_Type_ = 0;
 
@@ -199,12 +199,12 @@ int CSubtitleManipulate::groupingSentences_ByBlockTime(int block_ByMilliSecs,std
 			begin_Ruler = anchorPoint;
 			endingRuler = anchorPoint + nRulerWidth;
 
-			printf("Scanning at(i=%d): begin_Ruler=%d; ending_Ruler=%d; \r\n", i, begin_Ruler, endingRuler);
-			printf("\tv_subtitle[%d]={l_fromTime=%d; l_toTheTime=%d; fromTime=%s; ToTime=%s}\r\n", 
-								i, v_sub_title[i].l_From_Time,
-								v_sub_title[i].l_ToTheTime,
-								v_sub_title[i].fromTheTime.c_str(),
-								v_sub_title[i].to_Time.c_str());
+			// printf("Scanning at(i=%d): begin_Ruler=%d; ending_Ruler=%d; \r\n", i, begin_Ruler, endingRuler);
+			// printf("\tv_subtitle[%d]={l_fromTime=%d; l_toTheTime=%d; fromTime=%s; ToTime=%s}\r\n", 
+			//					i, v_sub_title[i].l_From_Time,
+			//					v_sub_title[i].l_ToTheTime,
+			//					v_sub_title[i].fromTheTime.c_str(),
+			//					v_sub_title[i].to_Time.c_str());
 
 			new_E.content = "";
 			new_E.l_From_Time = v_sub_title[i].l_From_Time;
@@ -214,9 +214,9 @@ int CSubtitleManipulate::groupingSentences_ByBlockTime(int block_ByMilliSecs,std
 			while (i < v_sub_title.size() && endingRuler > v_sub_title[i].l_From_Time && 
 					v_sub_title[i].l_ToTheTime >= begin_Ruler)	// overlapped between [beginRule, endingRuler) and [v_sub_title[i].l_From_Time, v_sub_title[i].l_ToTheTime]
 			{
-				printf("Find a overlapped: %s\r\n", v_sub_title[i].content.c_str());
-				printf("\tTime=(%s --> %s) = (%d --> %d)\r\n", v_sub_title[i].fromTheTime.c_str(), v_sub_title[i].to_Time.c_str(), v_sub_title[i].l_From_Time, v_sub_title[i].l_ToTheTime);
-				printf("\tPosition = %d\r\n", i);
+				// printf("Find a overlapped: %s\r\n", v_sub_title[i].content.c_str());
+				// printf("\tTime=(%s --> %s) = (%d --> %d)\r\n", v_sub_title[i].fromTheTime.c_str(), v_sub_title[i].to_Time.c_str(), v_sub_title[i].l_From_Time, v_sub_title[i].l_ToTheTime);
+				// printf("\tPosition = %d\r\n", i);
 
 				new_E.content += new_E.l_ToTheTime < 0 ? v_sub_title[i].content : string("\r\n") + v_sub_title[i].content;
 				new_E.l_ToTheTime = v_sub_title[i].l_ToTheTime;
@@ -232,7 +232,7 @@ int CSubtitleManipulate::groupingSentences_ByBlockTime(int block_ByMilliSecs,std
 
 			if (i > label_BeenProcessed)
 			{
-				printf("*****************************************ANEW\r\n");
+				// printf("*****************************************ANEW\r\n");
 				v_out.push_back(new_E);
 			}
 			else 
@@ -290,14 +290,17 @@ int CSubtitleManipulate::next_candidateMarkTypes(int currentType, int arr_outCan
 	}
 	else if (currentType == MARK_TYPE_BLANK)
 	{
+		/* Index or Time are acceptable */
 		arr_outCandidates[0] = MARK_TYPE_INDEX;
-		n_count = 1;
+		arr_outCandidates[1] = MARK_TYPE_TIME;   
+		n_count = 2;
 	}
 	else 
 	{
 		// Default case
 		arr_outCandidates[0] = MARK_TYPE_INDEX;
-		n_count = 1;
+		arr_outCandidates[1] = MARK_TYPE_TIME;
+		n_count = 2;
 	}
 
 	return ret;
@@ -305,9 +308,10 @@ int CSubtitleManipulate::next_candidateMarkTypes(int currentType, int arr_outCan
 
 bool CSubtitleManipulate::is_MarkType(const char* szLine, int n_mark_Type)
 {
+	// Note: For Time - Separators are . or , (e.g 00:00:07.919) (e.g 00:00:00,680)
     // 00:02:17,440 --> 00:02:20,375
 	std::regex regex_integer("[0-9]+"); // ("[[:digit:]]+");
-	std::regex regex_subtime("([0-9]{2}\\:[0-9]{2}\\:[0-9]{2}\\,[0-9]{3})[[:space:]]*-->[[:space:]]*([0-9]{2}\\:[0-9]{2}\\:[0-9]{2}\\,[0-9]{3})");
+	std::regex regex_subtime("([0-9]{2}\\:[0-9]{2}\\:[0-9]{2}[\\,\\.][0-9]{3})[[:space:]]*-->[[:space:]]*([0-9]{2}\\:[0-9]{2}\\:[0-9]{2}[\\,\\.][0-9]{3})");
 
     if (n_mark_Type == MARK_TYPE_INDEX)
     {
@@ -335,8 +339,9 @@ bool CSubtitleManipulate::is_MarkType(const char* szLine, int n_mark_Type)
 int CSubtitleManipulate::parse_Subtitle_Time(const char* szLine, std::string& str_from_Time, std::string& str_To_Time, long& fromTimeVal, long& to_Time_Val)
 {
     int ret = 1;
-    std::regex regex_subtime("([0-9]{2}\\:[0-9]{2}\\:[0-9]{2}\\,[0-9]{3})[[:space:]]*-->[[:space:]]*([0-9]{2}\\:[0-9]{2}\\:[0-9]{2}\\,[0-9]{3})");
-	std::regex regex_milli("([0-9]{2})\\:([0-9]{2})\\:([0-9]{2})\\,([0-9]{3})");
+    // Note: For Time - Separators are . or , (e.g 00:00:07.919) (e.g 00:00:00,680)
+    std::regex regex_subtime("([0-9]{2}\\:[0-9]{2}\\:[0-9]{2}[\\,\\.][0-9]{3})[[:space:]]*-->[[:space:]]*([0-9]{2}\\:[0-9]{2}\\:[0-9]{2}[\\,\\.][0-9]{3})");
+	std::regex regex_milli("([0-9]{2})\\:([0-9]{2})\\:([0-9]{2})[\\,\\.]([0-9]{3})");
     std::cmatch subtime_match;
 	std::cmatch milli_match;
 
