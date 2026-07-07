@@ -1,6 +1,6 @@
 # Subtitle Manupilation
 
-A lite and effective tools for grouping subtitle files by Setences and Time.
+A lite and effective tool for grouping subtitle files by Setences and Time.
 
 Usage:
 
